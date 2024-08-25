@@ -1,0 +1,12 @@
+[package]
+name = "common"
+version = "0.1.0"
+edition = "2021"
+authors = ["zzwtsy <zzwtsy@yumdeb.top>"]
+
+[dependencies]
+tonic = { version = "0.12" }
+prost = { version = "0.13", default-features = false, features = ["derive"] }
+
+[build-dependencies]
+tonic-build = "0.12"

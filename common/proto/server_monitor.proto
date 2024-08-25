@@ -1,0 +1,64 @@
+syntax = "proto3";
+package server_monitor;
+
+message ServerHost {
+  string os_name = 1;
+  string os_version = 2;
+  string distribution_id = 3;
+  string kernel_version = 4;
+  repeated string cpu = 5;
+  uint32 cpu_cores = 6;
+  uint64 mem_total = 7;
+  uint64 disk_total = 8;
+  uint64 swap_total = 9;
+  string arch = 10;
+  uint64 boot_time = 11;
+  string ipv4 = 12;
+  string ipv6 = 13;
+  string country_code = 14;
+}
+
+message ServerState {
+  float cpu_usage = 1;
+  uint64 mem_used = 2;
+  uint64 swap_used = 3;
+  uint64 disk_used = 4;
+  uint64 net_in_transfer = 5;
+  uint64 net_out_transfer = 6;
+  uint64 net_in_speed = 7;
+  uint64 net_out_speed = 8;
+  double load1 = 9;
+  double load5 = 10;
+  double load15 = 11;
+}
+
+message ServerStateRequest {
+  ServerState server_state = 1;
+  uint64 upload_time = 2;
+  string agent_version = 3;
+  uint64 server_id = 4;
+}
+
+message ServerHostRequest {
+  ServerHost server_host = 1;
+  uint64 upload_time = 2;
+  string agent_version = 3;
+  uint64 server_id = 4;
+}
+
+message UpdateIPRequest {
+  string ipv4 = 1;
+  string ipv6 = 2;
+  string country_code = 3;
+  uint64 server_id = 4;
+}
+
+message ServerResponse {
+  bool success = 1;
+}
+
+service ServerMonitorService {
+  rpc ReportServerHost(ServerHostRequest) returns (ServerResponse);
+  rpc ReportServerState(ServerStateRequest) returns (ServerResponse);
+  rpc UpdateIP(UpdateIPRequest) returns (ServerResponse);
+}

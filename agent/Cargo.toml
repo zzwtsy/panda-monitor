@@ -1,0 +1,8 @@
+[package]
+name = "agent"
+version = "0.1.0"
+edition = "2021"
+authors = ["zzwtsy <zzwtsy@yumdeb.top>"]
+
+[dependencies]
+clap = {version = "4.5", features = ["derive", "unicode", "env"]}
