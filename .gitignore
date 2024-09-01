@@ -1,3 +1,5 @@
 /target
 /debug
 .Ds_Store
+.vscode
+.idea
