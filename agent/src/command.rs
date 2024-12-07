@@ -24,4 +24,13 @@ pub struct Command {
     /// 指定主机状态信息的上报间隔时间，单位为秒。默认为 1 秒，表示每秒循环上报一次。
     #[arg(short, long, default_value_t = 1)]
     pub state_report_interval: u64,
+    /// ip 信息上报的时间间隔（小时）
+    /// 指定 ip 信息的上报间隔时间，单位为小时。默认为 0，表示仅在启动时上报一次。
+    /// 如果需要周期性上报，可以设置为大于 0 的值。
+    #[arg(short, long, default_value_t = 0)]
+    pub ip_report_interval: u64,
+    /// SSL 证书文件路径
+    /// 指定 SSL 证书文件的路径，用于加密数据传输。
+    #[arg(short = 'c', long)]
+    pub ssl_cert_path: String,
 }

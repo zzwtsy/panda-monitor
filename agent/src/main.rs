@@ -12,7 +12,7 @@ mod utils;
 async fn main() {
     let command = Command::parse();
     // TODO: 待进一步完善
-    ServerMonitorAgent::new(command.url, command.port, 1)
+    ServerMonitorAgent::new(command)
         .await
         .report_server_monitor()
         .await;

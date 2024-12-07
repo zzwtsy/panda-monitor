@@ -6,11 +6,11 @@ authors = ["zzwtsy <zzwtsy@yumdeb.top>"]
 
 [dependencies]
 anyhow = { workspace = true }
-tokio ={ workspace = true }
-serde ={ workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
-tonic = { version = "0.12" }
+tonic = { workspace = true }
 reqwest = { workspace = true }
 common = { path = "../common" }
-clap = {version = "4.5", features = ["derive", "unicode", "env"]}
-sysinfo = { version = "0.31" }
+clap = { version = "4.5", features = ["derive", "unicode", "env"] }
+sysinfo = { version = "0.32" }

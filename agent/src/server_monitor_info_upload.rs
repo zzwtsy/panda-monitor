@@ -1,47 +1,67 @@
 use std::{
     collections::HashSet,
     ops::Not,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use crate::fetch_ip::fetch_geo_ip;
+use crate::{command::Command, fetch_ip::fetch_geo_ip};
 use sysinfo::{CpuRefreshKind, Disks, Networks, RefreshKind, System};
 use tokio::time;
-use tonic::{transport::Channel, Request};
+use tonic::{
+    transport::{Certificate, Channel, ClientTlsConfig},
+    Request,
+};
 
-use common::server_monitor::{
-    server_monitor_service_client::ServerMonitorServiceClient, ServerHost, ServerHostRequest,
-    ServerState, ServerStateRequest, UpdateIpRequest,
+use common::panda_monitor::{
+    panda_monitor_client::PandaMonitorClient, ServerHost, ServerHostRequest, ServerState,
+    ServerStateRequest, UpdateIpRequest,
 };
 
 const VERSION: &'static str = include_str!(concat!(env!("OUT_DIR"), "/VERSION"));
 
 pub struct ServerMonitorAgent {
-    client: ServerMonitorServiceClient<Channel>,
+    client: PandaMonitorClient<Channel>,
     server_id: u64,
     sys: System,
     disks: Disks,
     networks: Networks,
+    command: Command,
 }
 
 impl ServerMonitorAgent {
-    pub async fn new(url: String, port: String, id: u64) -> Self {
-        let client = match ServerMonitorServiceClient::connect(format!("{url}:{port}")).await {
-            Ok(client) => client,
-            Err(err) => {
-                panic!("Grpc server connect failed: {}", err);
-            }
-        };
+    pub async fn new(command: Command) -> Self {
+        let url = format!("https://{}:{}", command.url, command.port);
+
+        let cert = std::fs::read_to_string(command.ssl_cert_path.clone())
+            .expect(format!("read ssl cert failed: {}", command.ssl_cert_path).as_str());
+
+        let tls = ClientTlsConfig::new()
+            .ca_certificate(Certificate::from_pem(&cert))
+            .domain_name(command.url.clone());
+
+        let channel = Channel::from_shared(url)
+            .expect("create grpc channel failed: Incalid url")
+            .tls_config(tls)
+            .expect("create grpc channel failed: Invalid tls config")
+            .timeout(Duration::from_secs(5))
+            .concurrency_limit(256)
+            .connect()
+            .await
+            .expect("grpc server connect failed");
+
+        let client = PandaMonitorClient::new(channel);
+
         let disks = Disks::new();
         let sys =
             System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()));
         let networks = Networks::new_with_refreshed_list();
         Self {
             client,
-            server_id: id,
+            server_id: command.state_report_interval,
             sys,
             disks,
             networks,
+            command,
         }
     }
 
@@ -49,13 +69,24 @@ impl ServerMonitorAgent {
     pub async fn report_server_monitor(&mut self) {
         // 仅在启动时上报一次
         self.report_server_host().await;
+        // 上传一次 ip 信息
+        if self.command.host_report_interval == 0 {
+            self.update_ip().await;
+        }
+        // 循环上报
         loop {
             self.report_server_state().await;
-            // 每间隔 3 小时上传一次 ip 信息
-            if self.get_upload_time() % (3 * 3600) == 0 {
+            // 上传 ip 信息
+            let ip_report_interval = self.command.ip_report_interval;
+            if ip_report_interval != 0 && self.get_upload_time() % (ip_report_interval * 3600) == 0
+            {
                 self.update_ip().await;
             }
-            time::sleep(time::Duration::from_secs(1)).await
+            // 等待上报间隔
+            time::sleep(time::Duration::from_secs(
+                self.command.state_report_interval,
+            ))
+            .await
         }
     }
 
