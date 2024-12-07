@@ -1,3 +1,3 @@
-pub mod server_monitor {
-    tonic::include_proto!("server_monitor");
+pub mod panda_monitor {
+    tonic::include_proto!("panda_monitor");
 }

@@ -22,7 +22,8 @@ fn get_git_version() -> String {
 
 fn main() {
     tonic_build::configure()
-        .compile(&["proto/server_monitor.proto"], &["proto"])
+        .build_transport(true)
+        .compile(&["proto/panda_monitor.proto"], &["proto"])
         .unwrap();
     let version = get_git_version();
     let mut f = File::create(Path::new(&env::var("OUT_DIR").unwrap()).join("VERSION")).unwrap();

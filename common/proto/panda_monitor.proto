@@ -1,5 +1,5 @@
 syntax = "proto3";
-package server_monitor;
+package panda_monitor;
 
 message ServerHost {
   string os_name = 1;
@@ -57,7 +57,7 @@ message ServerResponse {
   bool success = 1;
 }
 
-service ServerMonitorService {
+service PandaMonitor {
   rpc ReportServerHost(ServerHostRequest) returns (ServerResponse);
   rpc ReportServerState(ServerStateRequest) returns (ServerResponse);
   rpc UpdateIP(UpdateIPRequest) returns (ServerResponse);
