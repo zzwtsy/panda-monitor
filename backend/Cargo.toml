@@ -6,7 +6,8 @@ authors = ["zzwtsy <zzwtsy@yumdeb.top>"]
 
 [dependencies]
 anyhow = { workspace = true }
-salvo = "0.71.1"
+salvo = "0.73"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 common = { path = "../common" }
+tonic = { workspace = true }
