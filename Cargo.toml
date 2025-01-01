@@ -3,7 +3,7 @@ members = ["backend", "agent", "common"]
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1.0"
+anyhow = "1"
 tokio = { version = "1.40", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
@@ -12,3 +12,4 @@ reqwest = { version = "0.12", default-features = false, features = [
     "rustls-tls",
 ] }
 tonic = { version = "0.12", features = ["tls"] }
+jsonwebtoken = "9"

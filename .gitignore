@@ -3,3 +3,5 @@
 .Ds_Store
 .vscode
 .idea
+.sqlx
+backend/data

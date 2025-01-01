@@ -23,7 +23,8 @@ fn get_git_version() -> String {
 fn main() {
     tonic_build::configure()
         .build_transport(true)
-        .compile(&["proto/panda_monitor.proto"], &["proto"])
+        .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .compile_protos(&["proto/panda_monitor.proto"], &["proto"])
         .unwrap();
     let version = get_git_version();
     let mut f = File::create(Path::new(&env::var("OUT_DIR").unwrap()).join("VERSION")).unwrap();

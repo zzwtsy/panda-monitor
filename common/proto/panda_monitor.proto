@@ -1,25 +1,37 @@
 syntax = "proto3";
 package panda_monitor;
 
-message ServerHost {
+message Host {
+  // 系统名称
   string os_name = 1;
+  // 系统版本
   string os_version = 2;
+  // 发行版本
   string distribution_id = 3;
+  // 内核版本
   string kernel_version = 4;
+  // cpu 型号
   repeated string cpu = 5;
-  uint32 cpu_cores = 6;
+  // cpu 核心数
+  uint64 cpu_cores = 6;
+  // 总内存
   uint64 mem_total = 7;
+  // 总硬盘空间
   uint64 disk_total = 8;
+  // 总交换空间
   uint64 swap_total = 9;
+  // 系统架构
   string arch = 10;
+  // 开机时间
   uint64 boot_time = 11;
+  // ipv4 地址
   string ipv4 = 12;
+  // ipv6 地址
   string ipv6 = 13;
-  string country_code = 14;
 }
 
-message ServerState {
-  float cpu_usage = 1;
+message State {
+  double cpu_usage = 1;
   uint64 mem_used = 2;
   uint64 swap_used = 3;
   uint64 disk_used = 4;
@@ -32,33 +44,54 @@ message ServerState {
   double load15 = 11;
 }
 
-message ServerStateRequest {
-  ServerState server_state = 1;
-  uint64 upload_time = 2;
-  string agent_version = 3;
-  uint64 server_id = 4;
+message AgentInfo {
+  string agent_version = 1;
+  uint64 server_id = 2;
 }
 
-message ServerHostRequest {
-  ServerHost server_host = 1;
-  uint64 upload_time = 2;
-  string agent_version = 3;
-  uint64 server_id = 4;
+message StateRequest {
+  State state = 1;
+  AgentInfo agent_info = 2;
+  // 上传时间
+  uint64 upload_time = 3;
+}
+
+message HostRequest {
+  Host host = 1;
+  AgentInfo agent_info = 2;
+  // 上传时间
+  uint64 upload_time = 3;
 }
 
 message UpdateIPRequest {
   string ipv4 = 1;
   string ipv6 = 2;
-  string country_code = 3;
-  uint64 server_id = 4;
+  AgentInfo agent_info = 3;
+  // 上传时间
+  uint64 upload_time = 4;
 }
 
 message ServerResponse {
   bool success = 1;
 }
 
+message Command {
+  uint32 command = 1;
+  string data = 2;
+  repeated uint64 server_ids = 3;
+}
+
+message CommandRequest {
+  AgentInfo agent_info = 2;
+}
+
 service PandaMonitor {
-  rpc ReportServerHost(ServerHostRequest) returns (ServerResponse);
-  rpc ReportServerState(ServerStateRequest) returns (ServerResponse);
-  rpc UpdateIP(UpdateIPRequest) returns (ServerResponse);
+  // 上报服务器信息
+  rpc ReportServerHost(stream HostRequest) returns (ServerResponse) {}
+  // 上报服务器状态
+  rpc ReportServerState(stream StateRequest) returns (ServerResponse) {}
+  // 更新 IP 信息
+  rpc UpdateIP(UpdateIPRequest) returns (ServerResponse) {}
+  // 下发命令
+  rpc SendCommand(stream CommandRequest) returns (stream Command) {}
 }
