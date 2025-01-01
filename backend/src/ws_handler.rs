@@ -1,5 +1,4 @@
 use common::panda_monitor::Command;
-use salvo::http::StatusCode;
 use salvo::websocket::{Message, WebSocket, WebSocketUpgrade};
 use salvo::{async_trait, Depot, FlowCtrl, Handler, Request, Response};
 use tokio::sync::broadcast::Sender;

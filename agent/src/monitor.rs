@@ -24,7 +24,6 @@ pub struct ServerMonitorAgent {
     client: PandaMonitorClient<Channel>, // gRPC客户端
     server_id: u64,                      // 服务器ID
     system_info: SystemInfoCollector,    // 系统信息收集器
-    command: Command,                    // 配置命令
     report_state: bool,                  // 是否上报状态
 }
 
@@ -66,22 +65,8 @@ impl ServerMonitorAgent {
             client: PandaMonitorClient::new(channel),
             server_id: command.agent_id,
             system_info: SystemInfoCollector::new(),
-            command,
             report_state: false,
         })
-    }
-
-    /// 检查gRPC连接状态
-    async fn check_connection(&mut self) -> anyhow::Result<()> {
-        // 使用现有的get_server_host方法测试连接
-        let _ = time::timeout(
-            Duration::from_secs(GRPC_TIMEOUT_SECS),
-            self.get_server_host(),
-        )
-        .await
-        .map_err(|_| anyhow::anyhow!("连接检查超时"))?;
-
-        Ok(())
     }
 
     /// 发送命令并处理响应
